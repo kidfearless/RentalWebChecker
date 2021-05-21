@@ -10,11 +10,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/dom-parser": "^0.1.1",
     "body-parser": "^1.18.2",
+    "dom-parser": "^0.1.6",
     "dotenv": "^9.0.2",
     "express": "^4.16.3",
+    "html2json": "^1.0.2",
     "jsonfile": "^6.1.0",
     "mariadb": "^2.5.3",
+    "node-fetch": "^2.6.1",
     "sequelize": "^6.6.2",
     "sleep-promise": "^9.1.0",
     "web-push": "^3.3.1"
@@ -23,6 +27,7 @@
     "@types/express": "^4.17.11",
     "@types/jsonfile": "^6.0.0",
     "@types/node": "^15.3.1",
+    "@types/node-fetch": "^2.5.10",
     "@types/web-push": "^3.3.0"
   }
 }

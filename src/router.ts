@@ -8,7 +8,6 @@ import path = require("path");
 import { IEndPointFunction } from './IEndPointFunction';
 import sleep = require('sleep-promise');
 import * as WebPush from "web-push";
-import typehole from "typehole";
 import { DatabaseManager, DBSubscription } from './DatabaseManager';
 
 
@@ -47,7 +46,7 @@ export class Router
 		const subscription = request.body;
 
 		let dbSub = DBSubscription.FromSubscription(subscription);
-		await dbSub;
+		let sub = await dbSub;
 
 		console.log(JSON.stringify(subscription));
 

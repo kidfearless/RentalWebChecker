@@ -7,7 +7,7 @@ import * as File from "jsonfile";
 import { Config } from "./Config";
 import { Router } from './router';
 import { DatabaseManager } from './DatabaseManager';
-
+import { RentChecker } from "./RentChecker";
 
 export class App
 {
@@ -15,6 +15,7 @@ export class App
 	Router: Router;
 	Database: DatabaseManager;
 	static Instance: App;
+	RentChecker: RentChecker;
 	public static GetInstance()
 	{
 		return App.Instance;
@@ -41,6 +42,7 @@ export class App
 	{
 		await this.Database.Connect()
 		this.Router.Start();
+		this.RentChecker = new RentChecker();
 	}
 }
 

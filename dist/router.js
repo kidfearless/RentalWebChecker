@@ -32,7 +32,7 @@ class Router {
             // Get pushSubscription object
             const subscription = request.body;
             let dbSub = DatabaseManager_1.DBSubscription.FromSubscription(subscription);
-            yield dbSub;
+            let sub = yield dbSub;
             console.log(JSON.stringify(subscription));
             // Send 201 - resource created
             response.status(201).json({});

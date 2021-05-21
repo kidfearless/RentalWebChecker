@@ -14,6 +14,7 @@ const WebPush = require("web-push");
 const File = require("jsonfile");
 const router_1 = require("./router");
 const DatabaseManager_1 = require("./DatabaseManager");
+const RentChecker_1 = require("./RentChecker");
 class App {
     constructor() {
         App.Instance = this;
@@ -29,6 +30,7 @@ class App {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.Database.Connect();
             this.Router.Start();
+            this.RentChecker = new RentChecker_1.RentChecker();
         });
     }
 }
