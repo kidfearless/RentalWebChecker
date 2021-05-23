@@ -8,6 +8,10 @@ import { Config } from "./Config";
 import { Router } from './router';
 import { DatabaseManager } from './DatabaseManager';
 import { RentChecker } from "./RentChecker";
+import { DBRental } from './DBRentals';
+import { DBSubscription } from './DBSubscription';
+import { Subscription } from './Subscriptions';
+import { NotificationOptions } from "./NotificationOptions";
 
 export class App
 {
@@ -33,14 +37,35 @@ export class App
 			this.Config.Vapid.PrivateKey
 		);
 
+		DBRental.AddInsertHook(this.OnRentalFound.bind(this));
+
 		this.Database = new DatabaseManager(this.Config.Database);
 
 		this.Router = new Router();
+
+	}
+
+	async OnRentalFound(rental: DBRental)
+	{
+		let subscriptions = await DBSubscription.GetAllSubscriptions();
+		subscriptions.forEach((subscription: DBSubscription) =>
+		{
+			this.SendNotification(subscription.ToSubscription(), 
+			{
+				title: `New rental available for $${rental.Rent}`,
+				body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`
+			});
+		});
+	}
+
+	public SendNotification(subscription: Subscription, payload: NotificationOptions)
+	{
+		WebPush.sendNotification(subscription, JSON.stringify(payload));
 	}
 
 	public async Start()
 	{
-		await this.Database.Connect()
+		await this.Database.Connect();
 		this.Router.Start();
 		this.RentChecker = new RentChecker();
 	}
