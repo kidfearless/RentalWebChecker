@@ -8,7 +8,8 @@ import path = require("path");
 import { IEndPointFunction } from './IEndPointFunction';
 import sleep = require('sleep-promise');
 import * as WebPush from "web-push";
-import { DatabaseManager, DBSubscription } from './DatabaseManager';
+import { DatabaseManager } from './DatabaseManager';
+import { DBSubscription } from "./DBSubscription";
 
 
 interface EndPointDictionary
@@ -41,27 +42,13 @@ export class Router
 
 	public async Subscribe(request: express.Request, response: express.Response)
 	{
-		let db = DatabaseManager.GetIntance();
 		// Get pushSubscription object
 		const subscription = request.body;
 
-		let dbSub = DBSubscription.FromSubscription(subscription);
-		let sub = await dbSub;
-
-		console.log(JSON.stringify(subscription));
+		await DBSubscription.FromSubscription(subscription);
 
 		// Send 201 - resource created
-		response.status(201).json({});
-
-		// Create payload
-		const payload = JSON.stringify({ title: "Push Test" });
-
-		await sleep(2_000);
-
-		// Pass object into sendNotification
-		WebPush
-			.sendNotification(subscription, payload)
-			.catch(err => console.error(err));
+		response.status(201);
 	}
 
 

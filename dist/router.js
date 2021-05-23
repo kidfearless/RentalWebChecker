@@ -14,9 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Router = void 0;
 const express = require("express");
 const path = require("path");
-const sleep = require("sleep-promise");
-const WebPush = require("web-push");
-const DatabaseManager_1 = require("./DatabaseManager");
+const DBSubscription_1 = require("./DBSubscription");
 class Router {
     constructor() {
         this.GetRoutes = {};
@@ -28,21 +26,11 @@ class Router {
     }
     Subscribe(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = DatabaseManager_1.DatabaseManager.GetIntance();
             // Get pushSubscription object
             const subscription = request.body;
-            let dbSub = DatabaseManager_1.DBSubscription.FromSubscription(subscription);
-            let sub = yield dbSub;
-            console.log(JSON.stringify(subscription));
+            yield DBSubscription_1.DBSubscription.FromSubscription(subscription);
             // Send 201 - resource created
-            response.status(201).json({});
-            // Create payload
-            const payload = JSON.stringify({ title: "Push Test" });
-            yield sleep(2000);
-            // Pass object into sendNotification
-            WebPush
-                .sendNotification(subscription, payload)
-                .catch(err => console.error(err));
+            response.status(201);
         });
     }
     Start(port = 5006) {

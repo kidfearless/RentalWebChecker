@@ -15,16 +15,33 @@ const File = require("jsonfile");
 const router_1 = require("./router");
 const DatabaseManager_1 = require("./DatabaseManager");
 const RentChecker_1 = require("./RentChecker");
+const DBRentals_1 = require("./DBRentals");
+const DBSubscription_1 = require("./DBSubscription");
 class App {
     constructor() {
         App.Instance = this;
         this.Config = File.readFileSync("config.json");
         WebPush.setVapidDetails("mailto:test@test.com", this.Config.Vapid.PublicKey, this.Config.Vapid.PrivateKey);
+        DBRentals_1.DBRental.AddInsertHook(this.OnRentalFound.bind(this));
         this.Database = new DatabaseManager_1.DatabaseManager(this.Config.Database);
         this.Router = new router_1.Router();
     }
     static GetInstance() {
         return App.Instance;
+    }
+    OnRentalFound(rental) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let subscriptions = yield DBSubscription_1.DBSubscription.GetAllSubscriptions();
+            subscriptions.forEach((subscription) => {
+                this.SendNotification(subscription.ToSubscription(), {
+                    title: `New rental available for $${rental.Rent}`,
+                    body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`
+                });
+            });
+        });
+    }
+    SendNotification(subscription, payload) {
+        WebPush.sendNotification(subscription, JSON.stringify(payload));
     }
     Start() {
         return __awaiter(this, void 0, void 0, function* () {
