@@ -1,9 +1,9 @@
 import { App } from ".";
 import { default as fetch } from "node-fetch";
 import DomParser = require("dom-parser");
-import { RentalListing } from "./RentalListing";
-import { DBRental } from './DBRentals';
+import { JSONRental } from './JSONRental';
 
+const EAGLE_CAP_URL = "https://eaglecap.appfolio.com/listings?1621624388116";
 
 export class RentChecker
 {
@@ -16,7 +16,6 @@ export class RentChecker
 		this.Parser = new DomParser();
 	}
 
-
 	public async OnTicked()
 	{
 		await this.CheckEagleCap();
@@ -24,46 +23,56 @@ export class RentChecker
 
 	private async CheckEagleCap()
 	{
-		let response = await fetch("https://eaglecap.appfolio.com/listings?1621624388116");
+		let response = await fetch(EAGLE_CAP_URL);
 		let body = await response.text();
 		let html = this.Parser.parseFromString(body);
 		let listings = html.getElementsByClassName("listing-item");
-		listings.forEach(async (value) =>
+		for(let i = 0; i < listings.length; i++)
 		{
-			let listing = new RentalListing();
-			console.log(value);
+			await this.ParseListing(listings[i]);
+		}
 
-			let image = value.getElementsByClassName("listing-item__figure-container")[0];
-			let url = image.childNodes[1].getAttribute("href");
-			listing.URL = response.url + url;
+		await JSONRental.ExportToFile();
+	}
 
-			let facts = value.getElementsByClassName("js-listing-quick-facts")[0];
-			let allFacts = facts.getElementsByClassName("detail-box__item");
-			allFacts.forEach((elements) =>
+	private async ParseListing(value: DomParser.Node)
+	{
+		let image = value.getElementsByClassName("listing-item__figure-container")[0];
+		let url = EAGLE_CAP_URL + image.childNodes[1].getAttribute("href");
+
+		if (JSONRental.HasListing(url))
+		{
+			return;
+		}
+
+		let listing = new JSONRental(url);
+
+		let facts = value.getElementsByClassName("js-listing-quick-facts")[0];
+		let allFacts = facts.getElementsByClassName("detail-box__item");
+		allFacts.forEach((elements) =>
+		{
+			let key = elements.childNodes[1].textContent;
+			let value = elements.childNodes[3].textContent;
+
+			switch (key)
 			{
-				let key = elements.childNodes[1].textContent;
-				let value = elements.childNodes[3].textContent;
-
-				switch (key)
-				{
-					case "RENT":
-						listing.Rent = parseInt(value.substring(1));
-						break;
-					case "Square Feet":
-						listing.Size = parseInt(value);
-						break;
-					case "Bed / Bath":
-						let split = value.split("/");
-						listing.Beds = (split[0] === "Studio ") ? 0 : parseInt(split[0]);
-						listing.Baths = parseInt(split[1]);
-						break;
-					default: break;
-				}
-			});
-
-			listing.Description = value.getElementsByClassName("js-listing-description")[0].textContent;
-
-			let result = await DBRental.FromRentalListing(listing);
+				case "RENT":
+					listing.Rent = parseInt(value.substring(1));
+					break;
+				case "Square Feet":
+					listing.Size = parseInt(value);
+					break;
+				case "Bed / Bath":
+					let split = value.split("/");
+					listing.Beds = (split[0] === "Studio ") ? 0 : parseInt(split[0]);
+					listing.Baths = parseInt(split[1]);
+					break;
+				default: break;
+			}
 		});
+
+		listing.Description = value.getElementsByClassName("js-listing-description")[0].textContent;
+
+		listing.CacheListing();
 	}
 }

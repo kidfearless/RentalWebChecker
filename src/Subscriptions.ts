@@ -1,7 +1,7 @@
 export interface Subscription
 {
 	endpoint: string;
-	expirationTime: null | number;
+	expirationTime?: null | number;
 	keys: Keys;
 }
 

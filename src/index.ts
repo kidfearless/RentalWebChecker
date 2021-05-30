@@ -6,18 +6,19 @@ import * as sleep from "sleep-promise";
 import * as File from "jsonfile";
 import { Config } from "./Config";
 import { Router } from './router';
-import { DatabaseManager } from './DatabaseManager';
 import { RentChecker } from "./RentChecker";
-import { DBRental } from './DBRentals';
-import { DBSubscription } from './DBSubscription';
+import { JSONSubscription } from './JSONSubscription';
 import { Subscription } from './Subscriptions';
 import { NotificationOptions } from "./NotificationOptions";
+import { JSONRental } from "./JSONRental";
+
+export const ROOT_DIRECTORY = path.join(__dirname, "..");
+export const CURRENT_DIRECTORY = path.join(__dirname);
 
 export class App
 {
 	Config: Config;
 	Router: Router;
-	Database: DatabaseManager;
 	static Instance: App;
 	RentChecker: RentChecker;
 	public static GetInstance()
@@ -37,35 +38,36 @@ export class App
 			this.Config.Vapid.PrivateKey
 		);
 
-		DBRental.AddInsertHook(this.OnRentalFound.bind(this));
+		JSONRental.AddInsertHook(this.OnRentalFound.bind(this));
 
-		this.Database = new DatabaseManager(this.Config.Database);
+		JSONRental.Init();
+		JSONSubscription.Init();
 
 		this.Router = new Router();
 
 	}
 
-	async OnRentalFound(rental: DBRental)
+	async OnRentalFound(rental: JSONRental)
 	{
-		let subscriptions = await DBSubscription.GetAllSubscriptions();
-		subscriptions.forEach((subscription: DBSubscription) =>
+		let iterator = JSONSubscription.GetSubscriptions();
+
+		for(let subscription of iterator)
 		{
-			this.SendNotification(subscription.ToSubscription(), 
+			await this.SendNotification(subscription.ToSubscription(), 
 			{
 				title: `New rental available for $${rental.Rent}`,
 				body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`
 			});
-		});
+		}
 	}
 
-	public SendNotification(subscription: Subscription, payload: NotificationOptions)
+	public async SendNotification(subscription: Subscription, payload: NotificationOptions)
 	{
-		WebPush.sendNotification(subscription, JSON.stringify(payload));
+		await WebPush.sendNotification(subscription, JSON.stringify(payload));
 	}
 
-	public async Start()
+	public Start()
 	{
-		await this.Database.Connect();
 		this.Router.Start();
 		this.RentChecker = new RentChecker();
 	}

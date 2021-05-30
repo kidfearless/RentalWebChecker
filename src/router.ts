@@ -8,8 +8,7 @@ import path = require("path");
 import { IEndPointFunction } from './IEndPointFunction';
 import sleep = require('sleep-promise');
 import * as WebPush from "web-push";
-import { DatabaseManager } from './DatabaseManager';
-import { DBSubscription } from "./DBSubscription";
+import { JSONSubscription } from "./JSONSubscription";
 
 
 interface EndPointDictionary
@@ -45,7 +44,9 @@ export class Router
 		// Get pushSubscription object
 		const subscription = request.body;
 
-		await DBSubscription.FromSubscription(subscription);
+		JSONSubscription.Add(subscription);
+
+		await JSONSubscription.Add(subscription);
 
 		// Send 201 - resource created
 		response.status(201);
