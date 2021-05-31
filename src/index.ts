@@ -4,6 +4,10 @@ import * as bodyParser from "body-parser";
 import * as path from "path";
 import * as sleep from "sleep-promise";
 import * as File from "jsonfile";
+
+export const ROOT_DIRECTORY = path.join(__dirname, "..");
+export const CURRENT_DIRECTORY = path.join(__dirname);
+
 import { Config } from "./Config";
 import { Router } from './router';
 import { RentChecker } from "./RentChecker";
@@ -12,8 +16,6 @@ import { Subscription } from './Subscriptions';
 import { NotificationOptions } from "./NotificationOptions";
 import { JSONRental } from "./JSONRental";
 
-export const ROOT_DIRECTORY = path.join(__dirname, "..");
-export const CURRENT_DIRECTORY = path.join(__dirname);
 
 export class App
 {
@@ -49,6 +51,7 @@ export class App
 
 	async OnRentalFound(rental: JSONRental)
 	{
+		console.log("found rental, sending notifications");
 		let iterator = JSONSubscription.GetSubscriptions();
 
 		for(let subscription of iterator)
@@ -56,7 +59,13 @@ export class App
 			await this.SendNotification(subscription.ToSubscription(), 
 			{
 				title: `New rental available for $${rental.Rent}`,
-				body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`
+				body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`,
+				actions: [
+					{
+						action: "test-action",
+						title: "test title"
+					}
+				]
 			});
 		}
 	}

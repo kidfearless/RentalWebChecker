@@ -9,21 +9,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.App = void 0;
+exports.App = exports.CURRENT_DIRECTORY = exports.ROOT_DIRECTORY = void 0;
 const WebPush = require("web-push");
+const path = require("path");
 const File = require("jsonfile");
+exports.ROOT_DIRECTORY = path.join(__dirname, "..");
+exports.CURRENT_DIRECTORY = path.join(__dirname);
 const router_1 = require("./router");
-const DatabaseManager_1 = require("./DatabaseManager");
 const RentChecker_1 = require("./RentChecker");
-const DBRentals_1 = require("./DBRentals");
-const DBSubscription_1 = require("./DBSubscription");
+const JSONSubscription_1 = require("./JSONSubscription");
+const JSONRental_1 = require("./JSONRental");
 class App {
     constructor() {
         App.Instance = this;
         this.Config = File.readFileSync("config.json");
         WebPush.setVapidDetails("mailto:test@test.com", this.Config.Vapid.PublicKey, this.Config.Vapid.PrivateKey);
-        DBRentals_1.DBRental.AddInsertHook(this.OnRentalFound.bind(this));
-        this.Database = new DatabaseManager_1.DatabaseManager(this.Config.Database);
+        JSONRental_1.JSONRental.AddInsertHook(this.OnRentalFound.bind(this));
+        JSONRental_1.JSONRental.Init();
+        JSONSubscription_1.JSONSubscription.Init();
         this.Router = new router_1.Router();
     }
     static GetInstance() {
@@ -31,24 +34,30 @@ class App {
     }
     OnRentalFound(rental) {
         return __awaiter(this, void 0, void 0, function* () {
-            let subscriptions = yield DBSubscription_1.DBSubscription.GetAllSubscriptions();
-            subscriptions.forEach((subscription) => {
-                this.SendNotification(subscription.ToSubscription(), {
+            console.log("found rental, sending notifications");
+            let iterator = JSONSubscription_1.JSONSubscription.GetSubscriptions();
+            for (let subscription of iterator) {
+                yield this.SendNotification(subscription.ToSubscription(), {
                     title: `New rental available for $${rental.Rent}`,
-                    body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`
+                    body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`,
+                    actions: [
+                        {
+                            action: "test-action",
+                            title: "test title"
+                        }
+                    ]
                 });
-            });
+            }
         });
     }
     SendNotification(subscription, payload) {
-        WebPush.sendNotification(subscription, JSON.stringify(payload));
+        return __awaiter(this, void 0, void 0, function* () {
+            yield WebPush.sendNotification(subscription, JSON.stringify(payload));
+        });
     }
     Start() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.Database.Connect();
-            this.Router.Start();
-            this.RentChecker = new RentChecker_1.RentChecker();
-        });
+        this.Router.Start();
+        this.RentChecker = new RentChecker_1.RentChecker();
     }
 }
 exports.App = App;

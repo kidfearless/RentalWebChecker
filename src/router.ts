@@ -49,7 +49,7 @@ export class Router
 		await JSONSubscription.Add(subscription);
 
 		// Send 201 - resource created
-		response.status(201);
+		response.status(201).send();
 	}
 
 

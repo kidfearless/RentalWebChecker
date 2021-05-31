@@ -48,14 +48,28 @@ export class JSONSubscription
 
 	static async ImportFromFile()
 	{
-		let buffer = await File.readFile(this.JSON_PATH, { encoding: "utf8", flag: "rt"});
-		this.Cache =  JSON.parse(buffer);
+		let buffer = await File.readFile(this.JSON_PATH, { encoding: "utf8", flag: "r" });
+		if(buffer.length <= 1)
+		{
+			await this.ExportToFile();
+			return;
+		}
+		let array = JSON.parse(buffer);
+		
+		for(let i = 0; i < array.length; i++)
+		{
+			let subscription = array[i][1];
+			Object.setPrototypeOf(subscription, JSONSubscription.prototype);
+			array[i][1] = subscription;
+		}
+
+		this.Cache = new Map();
 	}
 
 	public static async ExportToFile()
 	{
 		await File.truncate(this.JSON_PATH);
-		await File.writeFile(this.JSON_PATH, JSON.stringify(this.Cache), {encoding: "utf8", flag: "wt"});
+		await File.writeFile(this.JSON_PATH, JSON.stringify(Array.from(this.Cache)), { encoding: "utf8" });
 	}
 
 	public static async Add(sub: Subscription): Promise<JSONSubscription>
@@ -93,10 +107,13 @@ export class JSONSubscription
 
 	public static async Init()
 	{
-		if(!FileSystem.existsSync(this.JSON_PATH))
+		if (FileSystem.existsSync(this.JSON_PATH))
 		{
-			File.writeFile(this.JSON_PATH, "{}")
+			this.ImportFromFile();
 		}
-		stat.
+		else
+		{
+			await File.appendFile(this.JSON_PATH, JSON.stringify(Array.from(this.Cache)), { encoding: "utf8" });
+		}
 	}
 }

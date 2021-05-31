@@ -11,13 +11,14 @@ export class RentChecker
 	Parser: DomParser;
 	constructor()
 	{
-		this.Timer = setInterval(this.OnTicked.bind(this), 1_000 * 60 * 15);
+		this.Timer = setInterval(this.OnTicked.bind(this), 1000 * 30 * 1);
 		this.OnTicked();
 		this.Parser = new DomParser();
 	}
 
 	public async OnTicked()
 	{
+		console.log("checking new rentals");
 		await this.CheckEagleCap();
 	}
 

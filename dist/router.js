@@ -14,7 +14,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Router = void 0;
 const express = require("express");
 const path = require("path");
-const DBSubscription_1 = require("./DBSubscription");
+const JSONSubscription_1 = require("./JSONSubscription");
 class Router {
     constructor() {
         this.GetRoutes = {};
@@ -28,7 +28,8 @@ class Router {
         return __awaiter(this, void 0, void 0, function* () {
             // Get pushSubscription object
             const subscription = request.body;
-            yield DBSubscription_1.DBSubscription.FromSubscription(subscription);
+            JSONSubscription_1.JSONSubscription.Add(subscription);
+            yield JSONSubscription_1.JSONSubscription.Add(subscription);
             // Send 201 - resource created
             response.status(201);
         });
