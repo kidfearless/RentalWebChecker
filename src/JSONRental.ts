@@ -1,8 +1,7 @@
 import * as Path from 'path';
 import { ROOT_DIRECTORY } from './index';
+import * as File from 'fs/promises';
 import * as FileSystem from 'fs';
-// node 12- support
-const File = FileSystem.promises;
 
 interface ListingInsertedCallback
 {

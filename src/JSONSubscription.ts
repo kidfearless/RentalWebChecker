@@ -2,9 +2,8 @@ import { DataTypes, Model, Sequelize } from "sequelize";
 import { ROOT_DIRECTORY } from ".";
 import { Subscription } from './Subscriptions';
 import * as Path from 'path';
+import * as File from 'fs/promises';
 import * as FileSystem from 'fs';
-const File = FileSystem.promises;
-
 
 
 export class JSONSubscription
