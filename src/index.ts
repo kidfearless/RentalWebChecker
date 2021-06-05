@@ -56,22 +56,22 @@ export class App
 
 		for(let subscription of iterator)
 		{
-			await this.SendNotification(subscription.ToSubscription(), 
-			{
-				title: `New rental available for $${rental.Rent}`,
-				body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`,
-				actions: [
-					{
-						action: "test-action",
-						title: "test title"
-					}
-				]
-			});
+			await App.SendNotification(subscription.ToSubscription(), rental);
 		}
 	}
 
-	public async SendNotification(subscription: Subscription, payload: NotificationOptions)
+	public static async SendNotification(subscription: Subscription, rental: JSONRental)
 	{
+		let payload: NotificationOptions = {
+			title: `New rental available for $${rental.Rent}`,
+			body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`,
+			actions: [
+				{
+					action: "test-action",
+					title: "test title"
+				}
+			]
+		};
 		await WebPush.sendNotification(subscription, JSON.stringify(payload));
 	}
 

@@ -80,7 +80,7 @@ export class JSONSubscription
 		instance.Auth = sub.keys.auth;
 		this.Cache.set(instance.EndPoint, instance);
 
-		this.ExportToFile();
+		await this.ExportToFile();
 		return instance;
 	}
 

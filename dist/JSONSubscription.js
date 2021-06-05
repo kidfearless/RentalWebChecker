@@ -65,7 +65,7 @@ class JSONSubscription {
             instance.P256DH = sub.keys.p256dh;
             instance.Auth = sub.keys.auth;
             this.Cache.set(instance.EndPoint, instance);
-            this.ExportToFile();
+            yield this.ExportToFile();
             return instance;
         });
     }

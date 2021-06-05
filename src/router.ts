@@ -9,6 +9,9 @@ import { IEndPointFunction } from './IEndPointFunction';
 import sleep = require('sleep-promise');
 import * as WebPush from "web-push";
 import { JSONSubscription } from "./JSONSubscription";
+import { JSONRental } from './JSONRental';
+import { App } from '.';
+import { Subscription } from './Subscriptions';
 
 
 interface EndPointDictionary
@@ -42,14 +45,19 @@ export class Router
 	public async Subscribe(request: express.Request, response: express.Response)
 	{
 		// Get pushSubscription object
-		const subscription = request.body;
+		const subscription:Subscription = request.body;
 
-		JSONSubscription.Add(subscription);
 
 		await JSONSubscription.Add(subscription);
 
 		// Send 201 - resource created
 		response.status(201).send();
+		
+		// Send the current cached notifications for testing.
+		for (const rental of JSONRental.GetRentals())
+		{
+			await App.SendNotification(subscription, rental);
+		}
 	}
 
 

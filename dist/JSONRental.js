@@ -114,6 +114,10 @@ class JSONRental {
         }
         JSONRental.Cache.set(this.Url, this);
     }
+    //#endregion
+    static GetRentals() {
+        return this.Cache.values();
+    }
 }
 exports.JSONRental = JSONRental;
 JSONRental.JSON_PATH = Path.join(index_1.ROOT_DIRECTORY, "Rentals.json");

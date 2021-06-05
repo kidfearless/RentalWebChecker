@@ -155,4 +155,9 @@ export class JSONRental
 	}
 
 	//#endregion
+
+	public static GetRentals(): IterableIterator<JSONRental>
+	{
+		return this.Cache.values();
+	}
 }

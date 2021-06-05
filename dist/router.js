@@ -15,6 +15,8 @@ exports.Router = void 0;
 const express = require("express");
 const path = require("path");
 const JSONSubscription_1 = require("./JSONSubscription");
+const JSONRental_1 = require("./JSONRental");
+const _1 = require(".");
 class Router {
     constructor() {
         this.GetRoutes = {};
@@ -28,10 +30,13 @@ class Router {
         return __awaiter(this, void 0, void 0, function* () {
             // Get pushSubscription object
             const subscription = request.body;
-            JSONSubscription_1.JSONSubscription.Add(subscription);
             yield JSONSubscription_1.JSONSubscription.Add(subscription);
             // Send 201 - resource created
             response.status(201).send();
+            // Send the current cached notifications for testing.
+            for (const rental of JSONRental_1.JSONRental.GetRentals()) {
+                yield _1.App.SendNotification(subscription, rental);
+            }
         });
     }
     Start(port = 5006) {

@@ -37,21 +37,22 @@ class App {
             console.log("found rental, sending notifications");
             let iterator = JSONSubscription_1.JSONSubscription.GetSubscriptions();
             for (let subscription of iterator) {
-                yield this.SendNotification(subscription.ToSubscription(), {
-                    title: `New rental available for $${rental.Rent}`,
-                    body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`,
-                    actions: [
-                        {
-                            action: "test-action",
-                            title: "test title"
-                        }
-                    ]
-                });
+                yield App.SendNotification(subscription.ToSubscription(), rental);
             }
         });
     }
-    SendNotification(subscription, payload) {
+    static SendNotification(subscription, rental) {
         return __awaiter(this, void 0, void 0, function* () {
+            let payload = {
+                title: `New rental available for $${rental.Rent}`,
+                body: `${rental.Beds} beds, ${rental.Baths} baths, ${rental.Size} FT`,
+                actions: [
+                    {
+                        action: "test-action",
+                        title: "test title"
+                    }
+                ]
+            };
             yield WebPush.sendNotification(subscription, JSON.stringify(payload));
         });
     }
